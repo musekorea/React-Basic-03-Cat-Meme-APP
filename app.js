@@ -56,12 +56,26 @@ const Form = ({ makeMeme, errorMessage }) => {
 const App = () => {
   const [error, setError] = React.useState('');
   const [catImage, setCatImage] = React.useState('');
+  const [likeCounter, setLikeCounter] = React.useState(0);
+
+  const initCat = async () => {
+    const initMeme = await fetchAPI('Hello There');
+    setCatImage(() => initMeme);
+  };
+
+  React.useEffect(() => {
+    initCat();
+  }, []);
+
   const makeMeme = async (inputValue) => {
     const catMeme = await fetchAPI(inputValue);
     setCatImage(() => catMeme);
   };
   const errorMessage = (validation) => {
     setError((prev) => validation);
+  };
+  const handleLike = (e) => {
+    setLikeCounter((prev) => prev + 1);
   };
   return (
     <div>
@@ -71,6 +85,8 @@ const App = () => {
       </p>
       <Form makeMeme={makeMeme} errorMessage={errorMessage} />
       <img className="cat_main_image" src={catImage} alt="" />
+      <p></p>
+      <button onClick={handleLike}>Like {likeCounter}</button>
     </div>
   );
 };
