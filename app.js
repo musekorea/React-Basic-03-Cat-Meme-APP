@@ -7,7 +7,6 @@ const fetchAPI = async (inputValue) => {
     );
     const apiJSON = await apiFetch.json();
     const catMeme = 'https://cataas.com' + apiJSON.url;
-    console.log(catMeme);
     return catMeme;
   } catch (error) {
     console.log(error);
@@ -53,11 +52,36 @@ const Form = ({ makeMeme, errorMessage }) => {
   );
 };
 
+const Favorites = ({ favorites }) => {
+  if (favorites.length === 0) {
+    return (
+      <div className="favorites_box">
+        <span>하트를 눌러 사진을 저장할 수 있어요^^</span>
+      </div>
+    );
+  }
+
+  const favoritesCounter = favorites.length === 0 ? null : favorites.length;
+  return (
+    <div className="favorites_box">
+      <p>Favorites : {favoritesCounter}</p>
+      <ul>
+        {favorites.map((favorite) => (
+          <li>
+            <img src={favorite} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const App = () => {
   const [error, setError] = React.useState('');
   const [catImage, setCatImage] = React.useState('');
-  const [likeCounter, setLikeCounter] = React.useState(0);
-
+  const [favorites, setFavorites] = React.useState(
+    JSON.parse(localStorage.getItem('favorites')) || []
+  );
   const initCat = async () => {
     const initMeme = await fetchAPI('Hello There');
     setCatImage(() => initMeme);
@@ -74,8 +98,9 @@ const App = () => {
   const errorMessage = (validation) => {
     setError((prev) => validation);
   };
-  const handleLike = (e) => {
-    setLikeCounter((prev) => prev + 1);
+  const handleSave = (e) => {
+    setFavorites((prev) => [...favorites, catImage]);
+    localStorage.setItem('favorites', JSON.stringify([...favorites, catImage]));
   };
   return (
     <div>
@@ -84,9 +109,11 @@ const App = () => {
         {error ? `Error : ${error} is not supported` : null}
       </p>
       <Form makeMeme={makeMeme} errorMessage={errorMessage} />
-      <img className="cat_main_image" src={catImage} alt="" />
-      <p></p>
-      <button onClick={handleLike}>Like {likeCounter}</button>
+      <div className="cat_main_box">
+        {catImage ? <img src={catImage} alt="" /> : '...Loading, please wait!!'}
+        <button onClick={handleSave}>❤</button>
+      </div>
+      <Favorites favorites={favorites} />
     </div>
   );
 };
